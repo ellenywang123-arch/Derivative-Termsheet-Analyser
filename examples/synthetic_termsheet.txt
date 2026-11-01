@@ -1,0 +1,9 @@
+SYNTHETIC EDUCATIONAL EXAMPLE — NOT AN ISSUED SECURITY
+Product: Memory Step-Down Autocall Note
+Underlying: Example Equity Index
+Autocall barrier: 100%
+Knock-in barrier: 60%
+Coupon barrier: 70%
+Coupon per observation: 2%
+Frequency: Quarterly
+Observation dates: 2027-01-15, 2027-04-15, 2027-07-15, 2027-10-15
