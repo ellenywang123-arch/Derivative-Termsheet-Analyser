@@ -8,3 +8,5 @@ outputs/
 private_inputs/
 *.pdf
 .ipynb_checkpoints/
+.cache/
+.test-tmp/
