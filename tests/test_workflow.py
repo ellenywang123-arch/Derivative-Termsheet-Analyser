@@ -44,9 +44,24 @@ class WorkflowTests(unittest.TestCase):
         return path
 
     def test_all_workflow_modules_import(self):
-        for name in ["step01_pdf","step02_extraction","step03_structure","step04_scenarios","step05_visualization","step06_parameters","step07_pricing","step08_reporting","notebook_view"]:
+        for name in ["step01_pdf","step02_extraction","step03_structure","step04_scenarios","step05_visualization","step06_parameters","step07_pricing","step08_reporting"]:
             with self.subTest(module=name):
                 importlib.import_module("termsheet_analyser."+name)
+
+    def test_pricing_reports_are_saved_as_files(self):
+        from termsheet_analyser import step08_reporting as reports
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(reports, "PricingParameterExtractor") as extractor, \
+                 patch.object(reports, "UniversalMonteCarloPricer") as pricer, \
+                 patch.object(reports, "generate_pricing_html_report", return_value="<html>Research report</html>"), \
+                 patch.object(reports, "generate_comprehensive_json", return_value={"status":"synthetic"}), \
+                 patch.object(reports, "generate_comprehensive_pdf", return_value=None):
+                extractor.return_value.extract_all.return_value = PricingParameters()
+                pricer.return_value.price.return_value = {"fair_value":1.0}
+                result = reports.run_task3_pricing(None, None, {}, {}, "sample.pdf", output_directory=tmp)
+            self.assertIn("Research report", (Path(tmp)/"comprehensive_report_sample.html").read_text())
+            self.assertEqual(json.loads((Path(tmp)/"comprehensive_report_sample.json").read_text()), {"status":"synthetic"})
+            self.assertEqual(result["results"], {"fair_value":1.0})
 
     def test_parameters_are_dataclasses_with_independent_mutables(self):
         a,b=PricingParameters(),PricingParameters()
@@ -147,10 +162,6 @@ class WorkflowTests(unittest.TestCase):
             self.assertEqual(Path(image).parent,Path(tmp))
             self.assertGreater(Path(image).stat().st_size,1000)
 
-    def test_table_styling_dependency_and_renderer(self):
-        from termsheet_analyser.step05_visualization import style_task1_table
-        table=pd.DataFrame([{"Term":"Coupon","Value":"6%"}])
-        self.assertIn("Coupon",style_task1_table(table,"Synthetic terms").to_html())
 
 
 if __name__=="__main__":

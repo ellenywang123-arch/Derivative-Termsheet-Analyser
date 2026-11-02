@@ -3,9 +3,6 @@ from __future__ import annotations
 
 from .config import Config as _Config
 Config = _Config()
-from .presentation import HTML
-from .presentation import Markdown
-from .presentation import display
 from .step06_parameters import PricingParameterExtractor
 from .step07_pricing import UniversalMonteCarloPricer
 from datetime import datetime
@@ -414,32 +411,23 @@ def run_task3_pricing(key_df, dates_df, viz_data, extra_tags, filename, scenario
     greeks = pricer.calculate_greeks()
     risks = pricer.calculate_risk_metrics()
 
-    # Display
-    display(Markdown("## 3. Monte Carlo Pricing Analysis (Task 3)"))
+    # Save reports as ordinary files.
     html = generate_pricing_html_report(params, results, greeks, risks)
-    display(HTML(html))
 
     # Generate outputs
     base_filename = os.path.splitext(filename)[0]
+    html_filename = os.path.join(str(output_directory or "."), f"comprehensive_report_{base_filename}.html")
+    with open(html_filename, "w", encoding="utf-8") as report:
+        report.write(html)
+    print(f"  HTML: {html_filename}")
     json_filename = os.path.join(str(output_directory or "."), f"comprehensive_report_{base_filename}.json")
     json_data = generate_comprehensive_json(filename, key_df, dates_df, viz_data, extra_tags, params, results, greeks, risks)
-    with open(json_filename, 'w') as f:
+    with open(json_filename, 'w', encoding='utf-8') as f:
         json.dump(json_data, f, indent=2, default=str)
     print(f"  JSON: {json_filename}")
 
     pdf_filename = generate_comprehensive_pdf(filename, key_df, dates_df, viz_data, extra_tags, params, results, greeks, risks, scenario_images, flowchart_image, output_directory=output_directory)
     if pdf_filename:
         print(f"  PDF: {pdf_filename}")
-
-    display(Markdown("---"))
-    display(Markdown(f"### Download: `{json_filename}` | `{pdf_filename}`"))
-
-    try:
-        from google.colab import files
-        files.download(json_filename)
-        if pdf_filename:
-            files.download(pdf_filename)
-    except:
-        pass
 
     return {'params': params, 'results': results, 'greeks': greeks, 'risks': risks}

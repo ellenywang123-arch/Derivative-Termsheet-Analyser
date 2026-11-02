@@ -1,26 +1,24 @@
-# Code review of the supplied notebook
+# Code review
 
-This review distinguishes the notebook's original research limitations from defects introduced by the earlier source packaging. It is not a certification of financial-model correctness. The API was mocked for tests; no real credential or confidential PDF was used. Reproduction commands below run on synthetic inputs.
+This review distinguishes the original research implementation's limitations from defects introduced by the earlier source packaging. It is not a certification of financial-model correctness. The API was mocked for tests; no real credential or confidential PDF was used. Reproduction commands below run on synthetic inputs.
 
 ## Fixed in this refactor
 
 | Problem | Origin | Change |
 | --- | --- | --- |
-| `PricingParameters` lost `@dataclass`; mutable fields became `Field` objects | Earlier packaging, not the original notebook | Restore the decorator; test independent mutable defaults and keyword construction |
-| Notebook adapter calls `Image` without importing it | Earlier packaging | Import the correct IPython display object and use `filename=` |
-| Methodology analysis calls `config.client.messages.create` and `config.model`, incompatible with the uppercase OpenAI-compatible config | Original notebook | Use `OpenAI(...).chat.completions.create` and `config.MODEL` consistently |
-| API/JSON failures silently substitute an invented autocallable product with default barriers/coupon | Original notebook | Raise an error; reject missing/unsupported product categories |
-| `0.5%` becomes `0.5` rather than `0.005`, making a `0.5% per month` coupon 600% annual rather than 6% | Original notebook | Explicit `%` values always divide by 100; regression tests cover 0.5%, 1% and 60% |
-| Reusing an extractor accumulates state from the previous document | Original notebook | Reset parameters and extraction log at the start of each extraction |
-| Installing IPython is mistaken for actually running inside a notebook; `display_id` can return no handle in a terminal | Original notebook | Isolate notebook display from computation and remove typewriter sleeps |
-| Scenario seed uses Python's process-randomised `hash()` | Original notebook | Derive a stable SHA-256 seed; this still uses NumPy global state, so concurrent execution remains a limitation |
-| Compressed date tables merge different events and lose row-level `Applies To` association before subsequent analysis | Original workflow | The new workflow passes and saves original row-level date records; compression remains a presentation helper |
-| Scenarios are displayed but their filenames are not collected for later reporting | Original notebook orchestration | Collect filenames and save new workflow artifacts to the selected output directory |
+| `PricingParameters` lost `@dataclass`; mutable fields became `Field` objects | Earlier packaging, not the original implementation | Restore the decorator; test independent mutable defaults and keyword construction |
+| Methodology analysis calls `config.client.messages.create` and `config.model`, incompatible with the uppercase OpenAI-compatible config | Original implementation | Use `OpenAI(...).chat.completions.create` and `config.MODEL` consistently |
+| API/JSON failures silently substitute an invented autocallable product with default barriers/coupon | Original implementation | Raise an error; reject missing/unsupported product categories |
+| `0.5%` becomes `0.5` rather than `0.005`, making a `0.5% per month` coupon 600% annual rather than 6% | Original implementation | Explicit `%` values always divide by 100; regression tests cover 0.5%, 1% and 60% |
+| Reusing an extractor accumulates state from the previous document | Original implementation | Reset parameters and extraction log at the start of each extraction |
+| Scenario seed uses Python's process-randomised `hash()` | Original implementation | Derive a stable SHA-256 seed; this still uses NumPy global state, so concurrent execution remains a limitation |
+| Compressed date tables merge different events and lose row-level `Applies To` association before subsequent analysis | Original workflow | The new workflow passes and saves original row-level date records; the workflow avoids date compression |
+| Scenarios are displayed but their filenames are not collected for later reporting | Original orchestration | Collect filenames and save new workflow artifacts to the selected output directory |
 | A long PDF is silently truncated to 70,000 characters | Original helper | New workflow detects overflow and stops rather than analysing a partial document silently |
-| A reporting function installs ReportLab at runtime | Original notebook | Declare dependencies in requirements; no runtime pip installation |
-| Prompt shows malformed JSON and contradictory barrier disambiguation instructions | Original notebook | Correct the example comma and the Autocall/Coupon wording |
+| A reporting function installs ReportLab at runtime | Original implementation | Declare dependencies in requirements; no runtime pip installation |
+| Prompt shows malformed JSON and contradictory barrier disambiguation instructions | Original implementation | Correct the example comma and the Autocall/Coupon wording |
 
-The original extraction, chart, payoff, export functions and prompts have been moved, not replaced with a small demonstration. See `source-map.json` for original source line ranges and destinations. The legacy notebook adapter is retained separately from the new workflow entry point.
+The original extraction, chart, payoff, export functions and prompts have been moved, not replaced with a small demonstration. The project now has one Python module entry point; legacy display adapters and wrappers have been removed. Previous source versions remain in Git history.
 
 ## Remaining model problems — do not present these outputs as validated valuations
 
@@ -68,7 +66,7 @@ The `monitoring_type` parameter is not used to change KI monitoring. A full-path
 
 Location: `step02_extraction.py`, `enforce_observation_dates`, `compress_dates_table`.
 
-The repair helper substitutes *all* explicit dates in the document when an observation row only states a frequency; these may include issue, payment or maturity dates. Compression groups only by Date Type, combining coupon and KO events. The new machine workflow does not use these helpers before analysis; they remain available to the old notebook presentation, where these risks are still present.
+The repair helper substitutes *all* explicit dates in the document when an observation row only states a frequency; these may include issue, payment or maturity dates. Compression groups only by Date Type, combining coupon and KO events. The new machine workflow does not use these helpers before analysis; they remain unused extraction helpers; do not introduce them into the workflow without correcting these risks.
 
 ### P2: LLM output validation is partial
 
@@ -89,4 +87,4 @@ The notional extraction branch is deliberately disabled with `if 0`, leaving val
 5. Supply reviewed market inputs; define the probability measure, risk horizon and reporting units.
 6. Only then extend product types and expose numerical results to external readers.
 
-No API keys were used during this review. Credentials from the original notebook remain excluded from this repository; rotating the old credentials is a separate account action.
+No API keys were used during this review. Credentials from the original implementation remain excluded from this repository; rotating the old credentials is a separate account action.

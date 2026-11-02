@@ -1,9 +1,6 @@
-"""05 — Render tables, product lifecycle and scenario charts."""
+"""05 — Render product lifecycle and scenario charts."""
 from __future__ import annotations
 
-from .presentation import HTML
-from .presentation import Markdown
-from .presentation import display
 from .step04_scenarios import generate_discrete_scenario_points
 from datetime import datetime
 from datetime import timedelta
@@ -522,77 +519,3 @@ class EducationalVisualizer:
         plt.savefig(fname, dpi=130, bbox_inches='tight', facecolor='white')
         plt.close()
         return fname
-
-def style_task1_table(df: pd.DataFrame, caption: str):
-    def zebra(row):
-        bg = "#f9f9f9" if row.name % 2 == 0 else "#ffffff"
-        return [f"background-color: {bg}"] * len(row)
-
-    styler = (
-        df.style
-          .hide(axis="index")
-          .set_caption(caption)
-          .set_table_styles(
-              [
-                  {
-                      "selector": "caption",
-                      "props": [
-                          ("caption-side", "top"),
-                          ("text-align", "left"),
-                          ("font-weight", "bold"),
-                          ("font-size", "14px"),
-                          ("background-color", "#007ACC"),
-                          ("color", "white"),
-                          ("padding", "8px"),
-                          ("border-radius", "4px 4px 0 0"),
-                      ],
-                  },
-                  {
-                      "selector": "table",
-                      "props": [
-                          ("border-collapse", "collapse"),
-                          ("border", "1px solid #d0d0d0"),
-                          ("width", "100%"),
-                          ("font-size", "12px"),
-                          ("background-color", "white"),
-                      ],
-                  },
-                  {
-                      "selector": "th",
-                      "props": [
-                          ("text-align", "left"),
-                          ("padding", "6px 10px"),
-                          ("background-color", "#f2f2f2"),
-                          ("border-bottom", "1px solid #d0d0d0"),
-                          ("white-space", "pre-wrap"),
-                      ],
-                  },
-                  {
-                      "selector": "td",
-                      "props": [
-                          ("text-align", "left"),
-                          ("padding", "6px 10px"),
-                          ("border-bottom", "1px solid #eeeeee"),
-                          ("white-space", "pre-wrap"),
-                      ],
-                  },
-              ],
-              overwrite=False,
-          )
-          .apply(zebra, axis=1)
-          .set_properties(**{"text-align": "left", "padding": "6px 10px"})
-    )
-    return styler
-
-def render_task1_table(df: pd.DataFrame, caption: str):
-    if df is None or df.empty:
-        display(Markdown(f"_No data for **{caption}**._"))
-        return
-
-    try:
-        styled = style_task1_table(df, caption)
-        html = styled.to_html(escape=False)
-        display(HTML(html))
-    except Exception:
-        display(Markdown(f"**{caption}**"))
-        display(df)

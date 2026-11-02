@@ -7,8 +7,6 @@ import sys
 
 def main(argv=None):
     argv=list(sys.argv[1:] if argv is None else argv)
-    if len(argv)==1 and not argv[0].startswith("-") and argv[0] not in {"tags", "analyse"}:
-        argv.insert(0, "tags")  # preserve the original one-file offline command
     parser=argparse.ArgumentParser(description="Derivative term-sheet research workflow")
     commands=parser.add_subparsers(dest="command", required=True)
     tags=commands.add_parser("tags", help="Extract structural regex hints from text without an API")

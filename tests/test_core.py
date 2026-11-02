@@ -1,5 +1,5 @@
 import unittest
-from termsheet_core import extract_structural_tags, _norm_text, _norm_value
+from termsheet_analyser.step02_extraction import extract_structural_tags, _norm_text, _norm_value
 
 class CoreTests(unittest.TestCase):
     def test_autocall_and_frequency(self):

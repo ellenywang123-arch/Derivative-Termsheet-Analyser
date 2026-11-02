@@ -14,5 +14,6 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - run: python -m unittest discover -s tests -v
       - run: python -m termsheet_analyser tags examples/synthetic_termsheet.txt
-      - run: python -m compileall -q termsheet_analyser cli.py run_pipeline.py
+      - run: python -m compileall -q termsheet_analyser
+      - run: python -m termsheet_analyser --help
       - run: python -m tools.diagnose_pricing

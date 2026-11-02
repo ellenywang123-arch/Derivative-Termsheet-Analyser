@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Offline tags",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "termsheet_analyser",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "args": ["tags", "examples/synthetic_termsheet.txt"]
+    },
+    {
+      "name": "Analyse PDF",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "termsheet_analyser",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env",
+      "args": ["analyse", "${input:pdfPath}", "--output", "outputs", "--no-charts"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "pdfPath",
+      "type": "promptString",
+      "description": "PDF path (relative to the project folder or absolute)",
+      "default": "private_inputs/example.pdf"
+    }
+  ]
+}

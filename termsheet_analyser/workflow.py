@@ -1,4 +1,4 @@
-"""Read this file first: the ordered, non-notebook research workflow.
+"""Read this file first: the ordered Python research workflow.
 
 PDF → extraction → structure → illustrations → optional pricing → saved artifacts.
 No website or browser demo is involved. API calls only occur when run_workflow is called.
@@ -67,7 +67,7 @@ def run_workflow(pdf_path, output_directory="outputs", *, config=None,
     key_terms = merge_synonyms_same_value(key_terms)
     key_terms.to_csv(output / "02_key_terms.csv", index=False)
     # Preserve row-level date/event/barrier associations. Summary compression and
-    # inferred date expansion remain available to the notebook adapter only.
+    # inferred date expansion are intentionally excluded from this workflow.
     dates.to_csv(output / "02_dates.csv", index=False)
     if dates.empty:
         warnings.append("No dated schedule extracted; event timing is unverified.")

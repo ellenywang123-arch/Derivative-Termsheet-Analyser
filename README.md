@@ -1,86 +1,101 @@
 # Derivative Term-sheet Analyser
 
-The complete Team C research notebook, reorganised into Python modules in workflow order. This repository contains the PDF extraction, LLM analysis, scenario visualisation, experimental pricing and reporting code — not a portfolio website or a replacement demonstration.
+A Python research project developed by Team C for the UBS Tomorrow Talent Program. It reads a derivative term-sheet PDF, extracts terms and dates with an LLM, explains the product structure, and saves analysis and charts as files.
 
-Developed for the UBS Tomorrow Talent Program. Team members in the supplied deck: CHEN Hongyu, LIU Haolin, PING An, TAN Xin Wei and WANG Ruotong (Elleny). This is a team research prototype, not a UBS product. Module ownership is not asserted as solely Elleny's.
+Team members in the supplied deck: CHEN Hongyu, LIU Haolin, PING An, TAN Xin Wei and WANG Ruotong (Elleny). This is a team research prototype, not a UBS product; module ownership is not asserted as solely Elleny's.
 
-**Start with [`workflow.py`](termsheet_analyser/workflow.py), then read the numbered modules below.** The [code review](docs/CODE_REVIEW.md) explains confirmed bugs, fixes and remaining model limitations.
+## Start here
 
-## Read the code in this order
+Read `termsheet_analyser/workflow.py` first. It connects the numbered modules:
 
-| Order | File | Input → output |
-| --- | --- | --- |
-| 01 | [`step01_pdf.py`](termsheet_analyser/step01_pdf.py) | PDF → text and issuer hint |
-| 02 | [`step02_extraction.py`](termsheet_analyser/step02_extraction.py) | Text → key terms, date/event rows and structural hints |
-| 03 | [`step03_structure.py`](termsheet_analyser/step03_structure.py) | Source text + tables → product classification, payoff logic and lifecycle specification |
-| 04 | [`step04_scenarios.py`](termsheet_analyser/step04_scenarios.py) | Scenario definitions + schedule → illustrative observation points |
-| 05 | [`step05_visualization.py`](termsheet_analyser/step05_visualization.py) | Structure and points → lifecycle and scenario figures; notebook table styling |
-| 06 | [`step06_parameters.py`](termsheet_analyser/step06_parameters.py) | Terms + methodology → typed pricing parameters |
-| 07 | [`step07_pricing.py`](termsheet_analyser/step07_pricing.py) | Parameters → research Monte Carlo values, Greeks and risk summaries |
-| 08 | [`step08_reporting.py`](termsheet_analyser/step08_reporting.py) | Research outputs → HTML, JSON and PDF reports |
+| File | Responsibility |
+| --- | --- |
+| `step01_pdf.py` | Read PDF text and issuer hints |
+| `step02_extraction.py` | Extract and normalise terms and dated events |
+| `step03_structure.py` | Interpret classification, payoff logic and lifecycle |
+| `step04_scenarios.py` | Generate illustrative scenario points |
+| `step05_visualization.py` | Save lifecycle and scenario charts |
+| `step06_parameters.py` | Build experimental pricing parameters |
+| `step07_pricing.py` | Run experimental Monte Carlo pricing and Greeks |
+| `step08_reporting.py` | Save experimental HTML, JSON and PDF reports |
 
-Supporting modules: [`config.py`](termsheet_analyser/config.py) reads environment variables; [`prompts.py`](termsheet_analyser/prompts.py) holds the LLM prompts; [`presentation.py`](termsheet_analyser/presentation.py) separates notebook display from computation. [`notebook_view.py`](termsheet_analyser/notebook_view.py) retains the original notebook-style orchestration for compatibility.
+`config.py` reads environment configuration; `prompts.py` contains the LLM prompts. `cli.py` parses command-line arguments, and `__main__.py` starts that command. The single application entry point is **`python -m termsheet_analyser`**, run from the repository root.
 
-```mermaid
-flowchart LR
-    PDF[01 PDF text] --> Extract[02 Parameter tables]
-    Extract --> Structure[03 Structure & payoff logic]
-    Structure --> Paths[04 Scenario points]
-    Paths --> Figures[05 Figures]
-    Structure -. opt-in .-> Params[06 Pricing parameters]
-    Params --> Price[07 Experimental pricer]
-    Price --> Reports[08 Research reports]
-    Extract --> Analysis[Saved analysis.json & CSVs]
-    Structure --> Analysis
+Default workflow: PDF -> terms and event tables -> structure -> illustrative charts and saved analysis. Steps 06-08 run only when `--include-pricing` is supplied. Their known financial-model limitations are documented in [docs/CODE_REVIEW.md](docs/CODE_REVIEW.md).
+
+## Run in VS Code on Windows
+
+1. Open this repository folder in VS Code, and install the recommended Python and Python Debugger extensions.
+2. In the integrated PowerShell terminal, create the environment and install dependencies:
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-No original top-level workflow definition was silently dropped. The [source map](docs/source-map.json) records destinations and line ranges in the previous sanitised source. The old 3,000+ line `research_pipeline.py` is now a short import adapter; the notebook imports modules rather than repeating all source code.
+Python 3.11 or newer is supported; adjust the Python launcher version if necessary. Use **Python: Select Interpreter** from the Command Palette and choose `.venv\Scripts\python.exe`.
 
-## Run
+3. Check the command without any API or private document:
 
-Requires Python 3.11+.
-
-```sh
-python -m venv .venv
-# Activate the environment using your platform's usual command.
-python -m pip install -r requirements.txt
+```powershell
+.\.venv\Scripts\python.exe -m termsheet_analyser tags examples/synthetic_termsheet.txt
 ```
 
-For lifecycle figures, install the Graphviz system executable and ensure `dot` is on PATH. Use `--no-charts` if you only need structured extraction and analysis.
+4. Create `private_inputs`, put your authorised PDF there, and configure the model in this terminal. The secure prompt below avoids typing the key directly into shell history:
 
-Set `TERMSHEET_API_KEY`, `TERMSHEET_BASE_URL` and `TERMSHEET_MODEL` in your shell. `.env.example` documents the names; `.env` files are not loaded automatically. Choose a model and endpoint available to your account. No API key is embedded in source, and imports do not make network requests.
-
-```sh
-python -m termsheet_analyser analyse private_inputs/example.pdf --output outputs
-python -m termsheet_analyser analyse private_inputs/example.pdf --output outputs --no-charts
+```powershell
+$keyInput = Read-Host 'API key' -AsSecureString
+$env:TERMSHEET_API_KEY = [System.Net.NetworkCredential]::new('', $keyInput).Password
+$env:TERMSHEET_BASE_URL = 'https://api.siliconflow.cn/v1'
+$env:TERMSHEET_MODEL = 'deepseek-ai/DeepSeek-V3.2'
+.\.venv\Scripts\python.exe -m termsheet_analyser analyse private_inputs/example.pdf --output outputs --no-charts
 ```
 
-The default workflow performs text extraction and structural analysis, preserving event-level date rows. It writes `02_raw_extraction.txt`, `02_key_terms.csv`, `02_dates.csv`, `analysis.json` and any rendered figures to the output directory. It stops on invalid extraction or missing structure instead of continuing with fabricated defaults. Long PDFs exceeding the configured context limit are rejected explicitly; OCR is not implemented.
+Choose an endpoint/model available to your account. `.env.example` documents variable names; the Python command does not automatically load `.env` files. API analysis sends PDF text to the selected provider. The key remains in the local process environment, not in source code.
 
-Pricing code is preserved but **opt-in**, because its financial assumptions and Greek calculations are not validated:
+To render charts, remove `--no-charts`. Lifecycle diagrams additionally require the Graphviz system executable (`dot`) on PATH; installing the Python package alone is insufficient. Without it, lifecycle rendering produces a warning. Scanned PDFs require OCR before use; this project does not implement OCR. Oversized PDFs are rejected instead of silently truncated.
 
-```sh
-python -m termsheet_analyser analyse private_inputs/example.pdf --output outputs --include-pricing
+### Run or debug with F5
+
+The included `.vscode/launch.json` provides **Offline tags** and **Analyse PDF** configurations. Select one in Run and Debug, then press F5. Analyse PDF asks for a path and defaults to `--no-charts`; edit its arguments to enable charts.
+
+For API debugging, create a local `.env` file using `.env.example` as a template and enter your key locally. The VS Code debugger loads this file through `envFile`; it is ignored by Git. Environment variables set only inside an integrated terminal do not automatically propagate back to the debugger. Never put a key in `launch.json`.
+
+Do not run individual `step*.py` files with Run Python File: they are modules called by the workflow, not separate applications. Use the module command or the F5 configuration.
+
+## Outputs
+
+`outputs/` contains extracted text, key-term and event CSVs, `analysis.json`, and any generated figures. Open these files directly from VS Code or your file browser.
+
+Experimental pricing can be enabled explicitly:
+
+```powershell
+.\.venv\Scripts\python.exe -m termsheet_analyser analyse private_inputs/example.pdf --output outputs --include-pricing
 ```
 
-Read [CODE_REVIEW.md](docs/CODE_REVIEW.md) before using this flag. It documents spot/reference normalisation, autocall coupon accrual, event timing, cached Greek results, market-input assumptions and risk-measure interpretation. No valuation-accuracy, investment-return or production-readiness claims are made.
+This also saves `comprehensive_report_*.html`, `.json` and, if PDF generation succeeds, `.pdf`. Pricing, Greeks and risk measures are not validated financial outputs; read the code review first.
 
-For local inspection without API calls:
+## Other files
 
-```sh
-python -m termsheet_analyser tags examples/synthetic_termsheet.txt
-python -m unittest discover -s tests -v
-python -m tools.diagnose_pricing
+| Path | Purpose |
+| --- | --- |
+| `requirements.txt` | Python dependencies |
+| `.env.example` | Configuration variable names, without a real key |
+| `.gitignore` | Excludes credentials, private PDFs, generated outputs and local environments |
+| `.vscode/` | Editor run/debug configuration and recommended extensions |
+| `tests/` | Offline automated software checks |
+| `examples/` | Synthetic input text |
+| `tools/diagnose_pricing.py` | Reproduces known pricing defects |
+| `docs/CODE_REVIEW.md` | Fixed runtime defects and remaining model limitations |
+| `.github/workflows/check.yml` | Runs automated checks on pushes and pull requests |
+
+## Checks
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe -m tools.diagnose_pricing
 ```
 
-The last command reproduces known model defects on synthetic inputs. It is a diagnostic, not a passing valuation benchmark.
+Tests use synthetic inputs and mocked API responses. They verify software behaviour, not real-document extraction accuracy or financial-model correctness. The diagnostic deliberately reports known defects and is not a valuation benchmark.
 
-## Validation
-
-Tests cover module imports, dataclass state, sub-1% conversion, API interface consistency, safe failures, a fixed-coupon reference case and the PDF-to-JSON workflow with synthetic PDFs and mocked model responses. No live model calls, real keys, confidential term sheets or proprietary market data are used. Mocked integration tests verify software wiring; they do not establish extraction accuracy or pricing correctness. The GitHub Actions workflow installs the declared dependencies and runs the same checks.
-
-## Credentials and reuse
-
-The original embedded key strings, notebook outputs, metadata and uploaded documents are excluded. Rotate any formerly embedded keys separately. API inputs are sent to the configured model provider: only use authorised documents. Private inputs, output reports, environments and caches are ignored by Git.
-
-This repository contains no ASTRI source or data. Packaging, module organisation, runtime fixes, orchestration and tests were added to the supplied team notebook. No licence is granted on behalf of other contributors; agree on reuse/publication rights before asserting an open-source licence.
+This repository contains no ASTRI source or data. Embedded credentials from the supplied source are excluded; old credentials should be rotated separately. No licence is granted on behalf of other contributors.
