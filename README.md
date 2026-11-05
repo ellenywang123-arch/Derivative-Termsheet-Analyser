@@ -2,7 +2,7 @@
 
 A Python research project developed by Team C for the UBS Tomorrow Talent Program. It reads a derivative term-sheet PDF, extracts terms and dates with an LLM, explains the product structure, and saves analysis and charts as files.
 
-Team members in the supplied deck: CHEN Hongyu, LIU Haolin, PING An, TAN Xin Wei and WANG Ruotong (Elleny). This is a team research prototype, not a UBS product; module ownership is not asserted as solely Elleny's.
+Team members in the supplied deck: CHEN Hongyu, LIU Haolin, PING An, TAN Xin Wei and WANG Ruotong (Elleny). This is a team research prototype, not a UBS product.
 
 ## Start here
 
