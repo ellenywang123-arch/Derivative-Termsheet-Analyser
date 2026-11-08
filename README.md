@@ -1,6 +1,6 @@
 # Derivative Term-sheet Analyser
 
-A Python automation project developed by Team C for the UBS Tomorrow Talent Program. The topic was provided by UBS Shanghai Global Markets Professionals。It aims to save structurers from reading the long and complex termsheet word by word.
+A Python automation project developed for UBS Tomorrow Talent Program in January 2026. The topic was provided by UBS Shanghai Global Markets Professionals。It aims to save structurers from reading the long and complex termsheet word by word.
 
 It reads a term-sheet PDF of an exotic product, extracts terms and dates with an LLM, explains the product structure, saves analysis and payoff charts, and outpouts key parameters for pricing.
 
