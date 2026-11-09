@@ -69,6 +69,63 @@ Do not run individual `step*.py` files with Run Python File: they are modules ca
 
 `outputs/` contains extracted text, key-term and event CSVs, `analysis.json`, and any generated figures. Open these files directly from VS Code or your file browser.
 
+
+### Example output: parameter extraction (Task 1)
+
+The following screenshots reproduce the saved display outputs of the [original project run](https://colab.research.google.com/drive/1Usc3Koy1pVuQhrnwVX5N4xpwb9xHzLi9). They are historical examples, not a fresh run of the refactored Python application. Original values and labels are preserved.
+
+![Extracted product parameters](docs/images/01-extracted-parameters.png)
+
+<details>
+<summary>Extracted observation, coupon and maturity dates</summary>
+
+![Extracted key dates](docs/images/01b-key-dates.png)
+
+</details>
+
+### Example output: structure and payoff analysis (Task 2)
+
+**Product classification**
+
+![Product classification and reasoning](docs/images/02-product-classification.png)
+
+**Lifecycle and logic flow**
+
+![Lifecycle and payoff flowchart](docs/images/03-lifecycle-flowchart.png)
+
+**Redemption logic**
+
+![Early redemption and maturity payoff logic](docs/images/04-payoff-logic.png)
+
+**Illustrative market scenarios**
+
+These are constructed paths for explaining payoff branches, not observed prices or estimated outcome probabilities. Scenario labels, coupon counts and barrier-monitoring assumptions are reproduced from the original output and have not been independently validated against the term sheet.
+
+![Scenario 1: early autocall](docs/images/05-early-autocall.png)
+
+![Scenario 2: safe maturity](docs/images/06-safe-maturity.png)
+
+![Scenario 3: knock-in with recovery](docs/images/07-knock-in-recovery.png)
+
+![Scenario 4: knock-in loss](docs/images/08-knock-in-loss.png)
+
+### Example output: experimental pricing (Task 3)
+
+These screenshots document the original prototype interface, not validated valuations, Greeks or portfolio risk estimates. The original run reported a pricing-methodology fallback, and its pricing configuration labels the coupon as conditional while Task 2 describes a fixed coupon. The displayed VaR/ES are prototype simulation outputs, not validated one-day market-risk measures. See [known model limitations](docs/CODE_REVIEW.md).
+
+**Simulation configuration and assumed inputs**
+
+![Original Monte Carlo configuration](docs/images/09-pricing-configuration.png)
+
+**Valuation and scenario probabilities**
+
+![Original experimental valuation results](docs/images/10-valuation-results.png)
+
+**Greeks and risk-metric display**
+
+![Original experimental Greeks and risk metrics](docs/images/11-greeks-risk-metrics.png)
+
+
 Experimental pricing can be enabled explicitly:
 
 ```powershell
